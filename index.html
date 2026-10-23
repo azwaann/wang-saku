@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ms">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f3d5e">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Wang Saku">
+  <meta name="description" content="Buku Wang Saku Digital — rekod kehadiran dan jumlah wang dibawa, disahkan dengan cap jari.">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="stylesheet" href="style.css">
+  <title>Buku Wang Saku</title>
+</head>
+<body>
+  <!-- Ikon SVG dikongsi -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-cap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6.6 4.6A9 9 0 0 1 18.4 5"/><path d="M4.3 9.2A8.6 8.6 0 0 1 20.3 12c0 .9 0 1.8-.2 2.7"/>
+      <path d="M4 13.2c.1 1.1 0 2.2-.3 3.3"/><path d="M7.2 10.4A5 5 0 0 1 17 12v1.6"/><path d="M7 14.2c0 1.5-.3 2.9-.9 4.2"/>
+      <path d="M12 12v2.2a9 9 0 0 1-1.4 4.8"/><path d="M15.4 16.8c-.2 1.3-.6 2.5-1.1 3.6"/><path d="M9.6 21c.4-.6.7-1.2 1-1.9"/>
+    </symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>
+    </symbol>
+    <symbol id="i-cek" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 12.5l4.5 4.5L19 7.5"/>
+    </symbol>
+    <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>
+    </symbol>
+    <symbol id="i-amaran" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>
+    </symbol>
+    <symbol id="i-buku" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 7.5h6M9 11h4"/>
+    </symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></symbol>
+    <symbol id="i-pasang" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M12 8v6M9 11l3 3 3-3"/>
+    </symbol>
+  </svg>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo"><svg><use href="#i-buku"/></svg></span>
+      <div style="min-width:0">
+        <div class="brand-sub" id="jabatan">&nbsp;</div>
+        <div class="brand-title">Buku Wang Saku</div>
+      </div>
+    </div>
+    <button class="icon-btn" id="btnMenu" aria-label="Menu" hidden><svg><use href="#i-menu"/></svg></button>
+  </header>
+  <div class="demo" id="demoBanner" hidden>MOD DEMO · data contoh sahaja, tidak dihantar ke mana-mana</div>
+
+  <main>
+    <!-- Memuatkan -->
+    <section class="view" id="v-muat">
+      <div class="loading"><div><div class="spin big" style="margin:0 auto 14px"></div>Memuatkan…</div></div>
+    </section>
+
+    <!-- Ralat -->
+    <section class="view" id="v-ralat" hidden>
+      <div class="card center">
+        <div class="big-ico bad"><svg><use href="#i-amaran"/></svg></div>
+        <h1 id="ralatTajuk">Ralat</h1>
+        <p class="muted" id="ralatMesej"></p>
+        <button class="btn btn-pri mt" id="btnCubaLagi">Cuba lagi</button>
+      </div>
+    </section>
+
+    <!-- Daftar telefon -->
+    <section class="view" id="v-daftar" hidden>
+      <div class="card" id="daftar1">
+        <div class="big-ico"><svg><use href="#i-cap"/></svg></div>
+        <h1>Daftar telefon anda</h1>
+        <p class="muted">Sekali sahaja. Masukkan No. Pekerja dan Kod Daftar yang diberi oleh pentadbir.</p>
+        <form id="fDaftar" autocomplete="off" novalidate>
+          <label class="lbl" for="inId">No. Pekerja</label>
+          <input class="input" id="inId" autocapitalize="characters" spellcheck="false" required>
+          <label class="lbl" for="inKod">Kod Daftar</label>
+          <input class="input kod" id="inKod" maxlength="6" autocapitalize="characters" spellcheck="false" required>
+          <div class="err" id="errDaftar1" hidden></div>
+          <button class="btn btn-pri mt" id="btnSemak" type="submit">Seterusnya</button>
+        </form>
+        <p class="small muted mt" id="demoKod" hidden>Mod demo: guna No. Pekerja <b>D001</b> dan Kod Daftar <b>DEMO01</b>.</p>
+      </div>
+
+      <div class="card" id="daftar2" hidden>
+        <h1>Adakah ini anda?</h1>
+        <div class="siapa"><div class="n" id="regNama"></div><div class="muted small" id="regId"></div></div>
+        <p class="muted mt">Telefon akan minta <b>cap jari / Face ID</b>. Selepas ini, setiap pagi anda cuma perlu imbas cap jari dan isi jumlah wang.</p>
+        <div class="err" id="errDaftar2" hidden></div>
+        <button class="btn btn-pri mt" id="btnDaftarCap"><svg><use href="#i-cap"/></svg>Daftar cap jari</button>
+        <button class="btn btn-link mt-s" id="btnBukanSaya">Bukan saya — kembali</button>
+      </div>
+
+      <div class="sep">atau</div>
+      <div class="card">
+        <h2>Pernah daftar di telefon ini?</h2>
+        <p class="muted small">Jika data apps terpadam, log masuk semula dengan cap jari anda.</p>
+        <div class="err" id="errLogMasuk" hidden></div>
+        <button class="btn btn-ghost mt" id="btnLogMasuk"><svg><use href="#i-cap"/></svg>Log masuk dengan cap jari</button>
+      </div>
+    </section>
+
+    <!-- Utama -->
+    <section class="view" id="v-utama" hidden>
+      <div class="greet">
+        <div class="hi" id="salam">Selamat pagi,</div>
+        <div class="nama" id="namaSaya"></div>
+        <div class="id" id="idSaya"></div>
+      </div>
+
+      <div class="card jam">
+        <div class="masa" id="jam">--:--:--</div>
+        <div class="tarikh" id="tarikh"></div>
+      </div>
+
+      <div class="card done" id="kadSiap" hidden>
+        <div class="bulat"><svg><use href="#i-cek"/></svg></div>
+        <div>
+          <div class="t">Rekod hari ini sudah dihantar</div>
+          <div class="muted small">Masa masuk <b class="tnum" id="siapMasa"></b>. Jumpa esok!</div>
+        </div>
+      </div>
+
+      <div class="card" id="kadBorang" hidden>
+        <div class="gps" id="gps">
+          <div class="ico"><svg><use href="#i-pin"/></svg></div>
+          <div style="min-width:0">
+            <div class="t" id="gpsT">Mencari lokasi anda…</div>
+            <div class="s" id="gpsS">Pastikan GPS / lokasi telefon dihidupkan.</div>
+          </div>
+          <div class="aksi" id="gpsAksi" hidden><button class="mini-btn" id="btnGps">Cuba lagi</button></div>
+        </div>
+
+        <label class="lbl" for="inWang" style="margin-top:18px">Jumlah wang yang dibawa hari ini</label>
+        <div class="wang">
+          <span>RM</span>
+          <input id="inWang" inputmode="decimal" placeholder="0.00" autocomplete="off" enterkeyhint="done">
+        </div>
+        <div class="err" id="errWang" hidden></div>
+
+        <button class="btn btn-pri mt" id="btnHantar" disabled><svg><use href="#i-cap"/></svg>Sahkan &amp; Hantar</button>
+      </div>
+
+      <div class="note" id="notaMasa">
+        <svg><use href="#i-info"/></svg>
+        <span>Masa masuk direkod mengikut <b>masa server</b>, bukan jam telefon. Rekod tidak boleh diubah selepas dihantar.</span>
+      </div>
+
+      <div class="card hint" id="kadPasang" hidden>
+        <div class="big-ico" style="width:42px;height:42px;margin:0;border-radius:12px"><svg style="width:22px;height:22px"><use href="#i-pasang"/></svg></div>
+        <div><b>Pasang di skrin utama</b><div class="muted small">Buka apps terus dari ikon setiap pagi.</div></div>
+        <button class="mini-btn" id="btnCaraPasang" style="background:var(--navy-soft)">Cara</button>
+        <button class="x" id="btnTutupPasang" aria-label="Tutup">×</button>
+      </div>
+    </section>
+
+    <!-- Resit -->
+    <section class="view" id="v-resit" hidden>
+      <div class="card">
+        <div class="resit-top">
+          <div class="tick"><svg><use href="#i-cek"/></svg></div>
+          <h1>Rekod diterima</h1>
+          <p class="muted">Terima kasih. Rekod anda telah disimpan.</p>
+        </div>
+        <dl class="rows mt" id="resitRows"></dl>
+      </div>
+      <button class="btn btn-pri" id="btnSelesai">Selesai</button>
+    </section>
+  </main>
+
+  <div id="lapisan"></div>
+
+  <script src="config.js"></script>
+  <script src="common.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

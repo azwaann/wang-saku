@@ -1,0 +1,17 @@
+{
+  "name": "Buku Wang Saku",
+  "short_name": "Wang Saku",
+  "description": "Rekod kehadiran dan jumlah wang dibawa, disahkan dengan cap jari.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#eef2f5",
+  "theme_color": "#0f3d5e",
+  "lang": "ms",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

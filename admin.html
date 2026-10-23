@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ms">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f3d5e">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="admin.css">
+  <title>Paparan Ketua · Buku Wang Saku</title>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-buku" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 7.5h6M9 11h4"/>
+    </symbol>
+    <symbol id="i-cetak" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/>
+    </symbol>
+    <symbol id="i-muat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>
+    </symbol>
+    <symbol id="i-kunci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/>
+    </symbol>
+  </svg>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo"><svg><use href="#i-buku"/></svg></span>
+      <div style="min-width:0">
+        <div class="brand-sub" id="jabatan">Buku Wang Saku</div>
+        <div class="brand-title">Paparan Ketua</div>
+      </div>
+    </div>
+    <button class="icon-btn" id="btnKeluar" aria-label="Log keluar" title="Log keluar" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l5-5-5-5M15 12H3"/></svg>
+    </button>
+  </header>
+  <div class="demo" id="demoBanner" hidden>MOD DEMO · data contoh · PIN demo: 123456</div>
+
+  <main class="lebar">
+    <section class="view" id="v-login" hidden>
+      <div class="card" style="max-width:420px;margin:24px auto 0;width:100%">
+        <div class="big-ico"><svg><use href="#i-kunci"/></svg></div>
+        <h1 class="center">Paparan Ketua</h1>
+        <p class="muted center">Masukkan PIN Ketua untuk melihat rekod harian.</p>
+        <form id="fLogin" autocomplete="off">
+          <label class="lbl" for="inPin">PIN</label>
+          <input class="input" id="inPin" type="password" inputmode="numeric" autocomplete="current-password" required>
+          <div class="err" id="errLogin" hidden></div>
+          <button class="btn btn-pri mt" id="btnLogin" type="submit">Masuk</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="view" id="v-papan" hidden>
+      <div class="toolbar">
+        <div class="datenav">
+          <button id="btnSebelum" aria-label="Hari sebelum">‹</button>
+          <input type="date" id="inTarikh" aria-label="Tarikh">
+          <button id="btnSelepas" aria-label="Hari selepas">›</button>
+        </div>
+        <button class="tb-btn" id="btnHariIni">Hari ini</button>
+        <div class="spacer"></div>
+        <button class="tb-btn" id="btnMuat"><svg><use href="#i-muat"/></svg><span class="lbl-panjang">Muat semula</span></button>
+        <button class="tb-btn pri" id="btnCetak"><svg><use href="#i-cetak"/></svg>Cetak / PDF</button>
+      </div>
+
+      <div class="tajuk-hari">
+        <h1 id="tajukHari">—</h1>
+        <span class="muted small" id="dikemas"></span>
+      </div>
+
+      <div class="tiles">
+        <div class="tile"><div class="k">Jumlah staf</div><div class="v" id="tStaf">–</div></div>
+        <div class="tile ok"><div class="k">Sudah isi</div><div class="v" id="tSudah">–</div><div class="bar"><i id="tBar" style="width:0"></i></div></div>
+        <div class="tile bad"><div class="k">Belum isi</div><div class="v" id="tBelum">–</div></div>
+        <div class="tile warn"><div class="k">Lewat</div><div class="v" id="tLewat">–</div></div>
+        <div class="tile duit"><div class="k">Jumlah wang dibawa</div><div class="v" id="tWang" style="font-size:24px">–</div></div>
+      </div>
+
+      <div class="tapis">
+        <div class="seg" id="seg">
+          <button data-t="semua" class="on">Semua</button>
+          <button data-t="belum">Belum isi</button>
+          <button data-t="sudah">Sudah isi</button>
+        </div>
+        <input class="cari" id="inCari" type="search" placeholder="Cari nama / no. pekerja">
+      </div>
+
+      <div class="jadual-wrap">
+        <table class="jadual">
+          <thead><tr><th>Bil</th><th>Nama</th><th>Masa masuk</th><th class="r">Jumlah (RM)</th><th>Lokasi</th><th>Status</th></tr></thead>
+          <tbody id="badan"></tbody>
+        </table>
+        <div class="kosong" id="kosong" hidden>Tiada rekod untuk paparan ini.</div>
+      </div>
+    </section>
+
+    <section class="view" id="v-muat">
+      <div class="loading"><div><div class="spin big" style="margin:0 auto 14px"></div>Memuatkan…</div></div>
+    </section>
+  </main>
+
+  <!-- Versi cetakan (dijana oleh admin.js) -->
+  <div id="cetak"></div>
+
+  <script src="config.js"></script>
+  <script src="common.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
