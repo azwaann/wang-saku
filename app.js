@@ -168,6 +168,7 @@
     try {
       const s = await WS.api('status', { staffId: saya.staffId });
       setSiap(s.done, s.masa);
+      paparCuti(s.cuti, s.done);
     } catch (e) {
       setSiap(false);
       toast(e.message);
@@ -188,6 +189,97 @@
       kemaskiniButang();
     }
   }
+
+  function paparCuti(c, done) {
+    $('kadCuti').hidden = !c;
+    if (!c) return;
+    $('cutiT').textContent = 'Hari ini: ' + c.jenis;
+    $('cutiS').textContent = 'Direkod untuk ' + WS.julatTarikh(c.mula, c.akhir) + '.' +
+      (done ? '' : ' Jika anda hadir ke pejabat, anda masih boleh isi rekod di bawah.');
+  }
+
+  // ---------- ketidakhadiran (cuti / kursus / tugas luar) ----------
+  $('btnCuti').onclick = async () => {
+    const btn = $('btnCuti');
+    sibuk(btn, 'Bersedia…');
+    try { await WS.cabaran.ambil(); } catch (e) { lepas(btn); return toast(e.message); }
+    lepas(btn);
+    const hari = WS.isoHariIni();
+    const minT = WS.tambahHari(hari, -(conf.cutiHariLepas || 3));
+    const jenisList = conf.jenisCuti || WS.JENIS_CUTI;
+    let jenis = '';
+    const sh = bukaSheet(
+      '<h1>Maklum ketidakhadiran</h1>' +
+      '<p class="muted small">Untuk cuti, kursus atau tugas luar. Tidak perlu berada di pejabat.</p>' +
+      '<label class="lbl">Jenis</label>' +
+      '<div class="chips" id="cJenis">' + jenisList.map(j => '<button type="button" class="chip" data-j="' + WS.esc(j) + '">' + WS.esc(j) + '</button>').join('') + '</div>' +
+      '<div class="dua">' +
+      '<div><label class="lbl" for="cMula">Dari</label><input class="input" type="date" id="cMula" value="' + hari + '" min="' + minT + '"></div>' +
+      '<div><label class="lbl" for="cAkhir">Hingga</label><input class="input" type="date" id="cAkhir" value="' + hari + '" min="' + hari + '"></div>' +
+      '</div>' +
+      '<label class="lbl" for="cCatatan">Catatan <span class="muted" style="font-weight:400">(cth: nama kursus, tempat)</span></label>' +
+      '<textarea class="input" id="cCatatan" maxlength="200" rows="2"></textarea>' +
+      '<div class="err" id="errCuti" hidden></div>' +
+      '<button class="btn btn-pri mt" id="btnCutiHantar"><svg><use href="#i-cap"/></svg>Imbas cap jari &amp; hantar</button>' +
+      '<button class="btn btn-link mt-s" id="btnCutiBatal">Batal</button>');
+    const q = sel => sh.querySelector(sel);
+    const err = m => { q('#errCuti').textContent = m || ''; q('#errCuti').hidden = !m; };
+    q('#btnCutiBatal').onclick = tutupSheet;
+    q('#cJenis').onclick = e => {
+      const b = e.target.closest('.chip');
+      if (!b) return;
+      jenis = b.dataset.j;
+      sh.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === b));
+      err('');
+    };
+    q('#cMula').onchange = () => {
+      const m = q('#cMula').value;
+      q('#cAkhir').min = m;
+      if (q('#cAkhir').value < m) q('#cAkhir').value = m;
+    };
+    q('#btnCutiHantar').onclick = async () => {
+      const mula = q('#cMula').value, akhir = q('#cAkhir').value || mula, catatan = q('#cCatatan').value.trim();
+      if (!jenis) return err('Sila pilih jenis.');
+      if (!mula) return err('Sila pilih tarikh.');
+      if (mula < minT) return err('Tarikh mula terlalu lama. Lebih ' + (conf.cutiHariLepas || 3) + ' hari lepas perlu direkod oleh ketua.');
+      if (akhir < mula) return err('Tarikh "Hingga" mesti sama atau selepas tarikh "Dari".');
+      if (jenis === 'Cuti Lain' && !catatan) return err('Sila nyatakan sebab dalam catatan.');
+      err('');
+      const btn2 = q('#btnCutiHantar');
+      const ch = WS.cabaran.guna();
+      if (!ch) {
+        sibuk(btn2, 'Bersedia…');
+        WS.cabaran.ambil().then(() => { lepas(btn2); toast('Sedia. Sila tekan sekali lagi.'); })
+          .catch(e => { lepas(btn2); err(e.message); });
+        return;
+      }
+      sibuk(btn2, 'Menunggu cap jari…');
+      q('#btnCutiBatal').hidden = true;
+      try {
+        const a = await WS.passkey.get(ch, saya.credId); // mesti dipanggil terus selepas tekan butang
+        sibuk(btn2, 'Menghantar…');
+        const r = await WS.api('absen', Object.assign({ jenis: jenis, mula: mula, akhir: akhir, catatan: catatan }, a));
+        sh.innerHTML = '<div class="grip"></div><div class="resit-top"><div class="tick" style="background:var(--info);box-shadow:0 0 0 10px var(--info-bg)"><svg><use href="#i-cek"/></svg></div>' +
+          '<h1>Ketidakhadiran dimaklumkan</h1><p class="muted">Rekod anda telah disimpan dan boleh dilihat oleh ketua.</p></div>' +
+          '<dl class="rows mt"><div><dt>Jenis</dt><dd>' + WS.esc(r.jenis) + '</dd></div>' +
+          '<div><dt>Tarikh</dt><dd>' + WS.esc(WS.julatTarikh(r.mula, r.akhir)) + '</dd></div>' +
+          (r.catatan ? '<div><dt>Catatan</dt><dd>' + WS.esc(r.catatan) + '</dd></div>' : '') +
+          '</dl><p class="muted small mt">Perlu ubah atau batal? Hubungi ketua anda.</p>' +
+          '<button class="btn btn-pri mt" id="btnCutiSiap">Selesai</button>';
+        sh.querySelector('#btnCutiSiap').onclick = () => { tutupSheet(); muatStatus(); };
+      } catch (e) {
+        lepas(btn2);
+        q('#btnCutiBatal').hidden = false;
+        err(e.message);
+        if (/tidak berdaftar/.test(e.message)) {
+          btn2.innerHTML = 'Daftar semula telefon ini';
+          btn2.onclick = () => { tutupSheet(); buangSaya(); keDaftar(); };
+        }
+      } finally {
+        WS.cabaran.ambil().catch(() => {});
+      }
+    };
+  };
 
   // jam
   function detik() {

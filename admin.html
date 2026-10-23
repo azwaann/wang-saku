@@ -21,6 +21,9 @@
     <symbol id="i-muat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>
     </symbol>
+    <symbol id="i-kalendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4M8 14h3"/>
+    </symbol>
     <symbol id="i-kunci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/>
     </symbol>
@@ -64,6 +67,7 @@
         </div>
         <button class="tb-btn" id="btnHariIni">Hari ini</button>
         <div class="spacer"></div>
+        <button class="tb-btn" id="btnRekodCuti"><svg><use href="#i-kalendar"/></svg><span class="lbl-panjang">Rekod cuti</span><span class="lbl-pendek">Cuti</span></button>
         <button class="tb-btn" id="btnMuat"><svg><use href="#i-muat"/></svg><span class="lbl-panjang">Muat semula</span></button>
         <button class="tb-btn pri" id="btnCetak"><svg><use href="#i-cetak"/></svg>Cetak / PDF</button>
       </div>
@@ -76,6 +80,7 @@
       <div class="tiles">
         <div class="tile"><div class="k">Jumlah staf</div><div class="v" id="tStaf">–</div></div>
         <div class="tile ok"><div class="k">Sudah isi</div><div class="v" id="tSudah">–</div><div class="bar"><i id="tBar" style="width:0"></i></div></div>
+        <div class="tile info"><div class="k">Cuti / Kursus</div><div class="v" id="tCuti">–</div></div>
         <div class="tile bad"><div class="k">Belum isi</div><div class="v" id="tBelum">–</div></div>
         <div class="tile warn"><div class="k">Lewat</div><div class="v" id="tLewat">–</div></div>
         <div class="tile duit"><div class="k">Jumlah wang dibawa</div><div class="v" id="tWang" style="font-size:24px">–</div></div>
@@ -86,6 +91,7 @@
           <button data-t="semua" class="on">Semua</button>
           <button data-t="belum">Belum isi</button>
           <button data-t="sudah">Sudah isi</button>
+          <button data-t="cuti">Cuti</button>
         </div>
         <input class="cari" id="inCari" type="search" placeholder="Cari nama / no. pekerja">
       </div>
@@ -103,6 +109,8 @@
       <div class="loading"><div><div class="spin big" style="margin:0 auto 14px"></div>Memuatkan…</div></div>
     </section>
   </main>
+
+  <div id="lapisan"></div>
 
   <!-- Versi cetakan (dijana oleh admin.js) -->
   <div id="cetak"></div>

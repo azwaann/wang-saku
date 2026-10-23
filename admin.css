@@ -18,12 +18,12 @@ main.lebar { max-width: 1120px; }
 .tajuk-hari { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; padding: 0 2px; }
 .tajuk-hari h1 { margin: 0; }
 
-.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(0, 1.6fr); gap: 12px; }
+.tiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)) minmax(0, 1.5fr); gap: 12px; }
 .tile .v { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tile { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow); }
 .tile .k { font-size: 13px; color: var(--muted); font-weight: 600; }
 .tile .v { font-size: 28px; font-weight: 750; letter-spacing: -.02em; font-variant-numeric: tabular-nums; margin-top: 2px; }
-.tile.ok .v { color: var(--ok); } .tile.bad .v { color: var(--bad); } .tile.warn .v { color: var(--warn); }
+.tile.info .v { color: var(--info); } .tile.ok .v { color: var(--ok); } .tile.bad .v { color: var(--bad); } .tile.warn .v { color: var(--warn); }
 .tile .bar { height: 6px; border-radius: 3px; background: #edf1f4; margin-top: 8px; overflow: hidden; }
 .tile .bar i { display: block; height: 100%; background: var(--ok); border-radius: 3px; transition: width .4s ease-out; }
 
@@ -40,6 +40,12 @@ table.jadual { width: 100%; border-collapse: collapse; font-size: 14px; }
 .jadual td { padding: 11px 14px; border-bottom: 1px solid #eef1f4; vertical-align: middle; }
 .jadual tr:last-child td { border-bottom: 0; }
 .jadual tr.belum td { background: #fffafa; }
+.jadual tr.cuti td { background: #f7faff; }
+.jadual td.lok.ada { font-size: 13px; max-width: 320px; }
+.batal { border: 0; background: none; color: var(--bad); font-size: 12px; font-weight: 600; margin-left: 6px; padding: 2px 4px; cursor: pointer; text-decoration: underline; }
+select.input { -webkit-appearance: none; appearance: none; padding-right: 36px;
+  background: #fbfcfd url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%235d6d7a' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 14px center; font-size: 16px; }
+.tb-btn .lbl-pendek { display: none; }
 .jadual .r { text-align: right; font-variant-numeric: tabular-nums; }
 .jadual .nm { font-weight: 600; }
 .jadual .sub { color: var(--faint); font-size: 12px; }
@@ -47,11 +53,14 @@ table.jadual { width: 100%; border-collapse: collapse; font-size: 14px; }
 .kosong { padding: 40px 16px; text-align: center; color: var(--muted); }
 .tag { display: inline-block; font-size: 11px; font-weight: 600; color: var(--muted); background: #eef1f4; border-radius: 6px; padding: 1px 6px; margin-left: 6px; }
 
-@media (max-width: 860px) { .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); } .tile.duit { grid-column: 1 / -1; } }
+@media (max-width: 960px) { .tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 640px) {
   .tiles { grid-template-columns: repeat(2, 1fr); }
-  .tile.duit { grid-column: span 2; }
   .tb-btn .lbl-panjang { display: none; }
+  .tb-btn .lbl-pendek { display: inline; }
+  .jadual tr.cuti { background: #f7faff; }
+  .jadual tr.cuti td { background: none; }
+  .jadual td.lok.ada { display: block; grid-column: 1 / span 2; color: var(--muted); max-width: none; margin-top: 4px; }
   .jadual thead { display: none; }
   .jadual, .jadual tbody, .jadual tr, .jadual td { display: block; width: 100%; }
   .jadual tr { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; padding: 12px 14px; border-bottom: 1px solid #eef1f4; }

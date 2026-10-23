@@ -38,6 +38,9 @@
     <symbol id="i-buku" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 7.5h6M9 11h4"/>
     </symbol>
+    <symbol id="i-kalendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4M8 14h3"/>
+    </symbol>
     <symbol id="i-menu" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></symbol>
     <symbol id="i-pasang" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M12 8v6M9 11l3 3 3-3"/>
@@ -120,6 +123,14 @@
         <div class="tarikh" id="tarikh"></div>
       </div>
 
+      <div class="card kad-cuti" id="kadCuti" hidden>
+        <div class="bulat"><svg><use href="#i-kalendar"/></svg></div>
+        <div>
+          <div class="t" id="cutiT"></div>
+          <div class="muted small" id="cutiS"></div>
+        </div>
+      </div>
+
       <div class="card done" id="kadSiap" hidden>
         <div class="bulat"><svg><use href="#i-cek"/></svg></div>
         <div>
@@ -152,6 +163,8 @@
         <svg><use href="#i-info"/></svg>
         <span>Masa masuk direkod mengikut <b>masa server</b>, bukan jam telefon. Rekod tidak boleh diubah selepas dihantar.</span>
       </div>
+
+      <button class="btn btn-ghost" id="btnCuti"><svg><use href="#i-kalendar"/></svg>Tidak ke pejabat? Maklum cuti / kursus</button>
 
       <div class="card hint" id="kadPasang" hidden>
         <div class="big-ico" style="width:42px;height:42px;margin:0;border-radius:12px"><svg style="width:22px;height:22px"><use href="#i-pasang"/></svg></div>

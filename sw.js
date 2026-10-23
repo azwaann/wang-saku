@@ -1,6 +1,6 @@
 // Service worker ringkas: apps boleh dibuka dengan pantas walaupun internet perlahan.
 // Strategi "rangkaian dahulu" supaya kemas kini sentiasa sampai; cache hanya sebagai sandaran.
-const CACHE = 'wang-saku-v1';
+const CACHE = 'wang-saku-v2';
 const FAIL = ['./', './index.html', './admin.html', './style.css', './admin.css', './common.js', './app.js', './admin.js',
   './config.js', './manifest.json', './icons/icon-192.png', './icons/icon-180.png'];
 

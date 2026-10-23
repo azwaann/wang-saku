@@ -4,6 +4,7 @@
   const CFG = window.WS_CONFIG || {};
   const DEMO = !CFG.API_URL;
   const TZ = 'Asia/Kuala_Lumpur';
+  const JENIS_CUTI = ['Cuti Rehat', 'Cuti Sakit', 'Cuti Kecemasan', 'Kursus / Latihan', 'Tugas Luar', 'Cuti Lain'];
 
   const b64u = {
     enc(buf) {
@@ -157,6 +158,16 @@
     const dt = new Date(Date.UTC(y, m - 1, d));
     return HARI[dt.getUTCDay()] + ', ' + d + ' ' + BULAN[m - 1] + ' ' + y;
   }
+  function tarikhSederhana(iso) {
+    const [y, m, d] = iso.split('-').map(Number);
+    return d + ' ' + BULAN[m - 1] + ' ' + y;
+  }
+  function julatTarikh(mula, akhir) {
+    if (!akhir || mula === akhir) return tarikhSederhana(mula);
+    const [y1, m1, d1] = mula.split('-').map(Number), [y2, m2] = akhir.split('-').map(Number);
+    if (y1 === y2 && m1 === m2) return d1 + ' – ' + tarikhSederhana(akhir);
+    return tarikhSederhana(mula) + ' – ' + tarikhSederhana(akhir);
+  }
   function jamKini(d) {
     const p = bahagian(d || new Date());
     return (p.hour === '24' ? '00' : p.hour) + ':' + p.minute + ':' + p.second;
@@ -175,14 +186,14 @@
   }
 
   // ---------------- MOD DEMO (tiada server) ----------------
-  const DK = 'ws_demo_v1';
+  const DK = 'ws_demo_v2';
   function demoState() {
     let s = null;
     try { s = JSON.parse(localStorage.getItem(DK)); } catch (e) { /* abaikan */ }
-    if (s && s.v === 1) return s;
+    if (s && s.v === 2) return s;
     const hari = isoHariIni();
     s = {
-      v: 1, office: null,
+      v: 2, office: null,
       staf: [
         ['D001', 'Pengguna Demo', 'Unit Percubaan', 'DEMO01'],
         ['K1021', 'Ahmad Faizal bin Rahman', 'Unit Penguatkuasaan', ''],
@@ -199,6 +210,10 @@
         [hari, '08:34:18', 'K1073', 75, 23],
       ].map(r => ({ tarikh: r[0], masa: r[1], id: r[2], jumlah: r[3], jarak: r[4], lokasi: 'Pejabat Utama (demo)',
         status: r[1] > '08:30:00' ? 'Lewat' : 'Tepat Masa' })),
+      cuti: [
+        { id: 'C1', id_staf: 'K1052', jenis: 'Cuti Rehat', mula: hari, akhir: tambahHari(hari, 2), catatan: 'Urusan keluarga', oleh: 'Staf (cap jari)' },
+        { id: 'C2', id_staf: 'K1089', jenis: 'Kursus / Latihan', mula: hari, akhir: hari, catatan: 'Kursus Pengurusan Risiko', oleh: 'Ketua' },
+      ],
     };
     demoSimpan(s);
     return s;
@@ -229,7 +244,7 @@
           demoSimpan(s);
         }
         return { jabatan: 'Jabatan Demo', lokasi: [{ nama: 'Pejabat Utama (demo)', lat: s.office.lat, lng: s.office.lng, radius: 200 }],
-          maxAcc: 100, maxAmt: 10000 };
+          maxAcc: 100, maxAmt: 10000, jenisCuti: JENIS_CUTI, cutiHariLepas: 3 };
       }
       case 'regBegin': {
         const st = s.staf.find(x => x.id === String(b.staffId || '').trim().toUpperCase());
@@ -250,7 +265,27 @@
       }
       case 'status': {
         const r = s.rekod.find(x => x.tarikh === hari && x.id === String(b.staffId).toUpperCase());
-        return { tarikh: hari, masaServer: masa, done: !!r, masa: r ? r.masa : null };
+        const c = cutiPada(s, hari, String(b.staffId).toUpperCase());
+        return { tarikh: hari, masaServer: masa, done: !!r, masa: r ? r.masa : null, cuti: c };
+      }
+      case 'absen': {
+        const st = cariCred(b.credId);
+        if (!st) demoErr('Telefon ini tidak berdaftar. Sila daftar semula.');
+        if (b.mula < tambahHari(hari, -3)) demoErr('Tarikh mula terlalu lama. Ketidakhadiran lebih 3 hari lepas perlu direkod oleh ketua.');
+        return demoSimpanCuti(s, st, b, 'Staf (cap jari)');
+      }
+      case 'adminAbsen': {
+        if (b.pin !== '123456') demoErr('PIN salah.');
+        const st = s.staf.find(x => x.id === String(b.staffId).toUpperCase());
+        if (!st) demoErr('Staf tidak dijumpai.');
+        return demoSimpanCuti(s, st, b, 'Ketua');
+      }
+      case 'adminBatalAbsen': {
+        if (b.pin !== '123456') demoErr('PIN salah.');
+        const i = s.cuti.findIndex(x => x.id === b.id);
+        if (i < 0) demoErr('Rekod tidak dijumpai atau sudah dibatalkan.');
+        s.cuti.splice(i, 1); demoSimpan(s);
+        return { id: b.id };
       }
       case 'clockIn': {
         const st = cariCred(b.credId);
@@ -276,18 +311,40 @@
         const tarikh = b.date || hari;
         const senarai = s.staf.map(st => {
           const r = s.rekod.find(x => x.tarikh === tarikh && x.id === st.id);
+          const c = cutiPada(s, tarikh, st.id);
           return { staffId: st.id, nama: st.nama, jawatan: st.jawatan, daftar: !!st.cred, done: !!r, masa: r ? r.masa : '',
-            jumlah: r ? r.jumlah : 0, lokasi: r ? r.lokasi : '', jarak: r ? r.jarak : null, status: r ? r.status : 'Belum isi' };
+            jumlah: r ? r.jumlah : 0, lokasi: r ? r.lokasi : '', jarak: r ? r.jarak : null,
+            status: r ? r.status : (c ? c.jenis : 'Belum isi'), cuti: c };
         });
         const sudah = senarai.filter(x => x.done);
-        return { jabatan: 'Jabatan Demo', tarikh: tarikh, dijana: tarikh + 'T' + masa, senarai: senarai,
-          ringkasan: { jumlahStaf: senarai.length, sudah: sudah.length, belum: senarai.length - sudah.length,
+        const bercuti = senarai.filter(x => !x.done && x.cuti);
+        return { jabatan: 'Jabatan Demo', tarikh: tarikh, dijana: tarikh + 'T' + masa, senarai: senarai, jenisCuti: JENIS_CUTI,
+          ringkasan: { jumlahStaf: senarai.length, sudah: sudah.length, cuti: bercuti.length, belum: senarai.length - sudah.length - bercuti.length,
             lewat: sudah.filter(x => x.status === 'Lewat').length, jumlahWang: sudah.reduce((a, x) => a + x.jumlah, 0) } };
       }
       default: demoErr('Tindakan tidak sah.');
     }
   }
+  function cutiPada(s, tarikh, id) {
+    const c = s.cuti.find(x => x.id_staf === id && x.mula <= tarikh && tarikh <= x.akhir);
+    return c ? { id: c.id, jenis: c.jenis, catatan: c.catatan, oleh: c.oleh, mula: c.mula, akhir: c.akhir } : null;
+  }
+  function demoSimpanCuti(s, st, b, oleh) {
+    const mula = b.mula, akhir = b.akhir || b.mula;
+    if (JENIS_CUTI.indexOf(b.jenis) < 0) demoErr('Sila pilih jenis ketidakhadiran.');
+    const iso = /^\d{4}-\d{2}-\d{2}$/;
+    if (!iso.test(mula || '') || !iso.test(akhir || '')) demoErr('Tarikh tidak sah.');
+    if (akhir < mula) demoErr('Tarikh akhir mesti sama atau selepas tarikh mula.');
+    if (b.jenis === 'Cuti Lain' && !String(b.catatan || '').trim()) demoErr('Sila nyatakan sebab dalam catatan untuk "Cuti Lain".');
+    const t = s.cuti.find(x => x.id_staf === st.id && !(akhir < x.mula || mula > x.akhir));
+    if (t) demoErr('Sudah ada rekod ' + t.jenis + ' (' + t.mula + ' hingga ' + t.akhir + ') yang bertindih. Minta ketua batalkan dahulu jika perlu ubah.');
+    const c = { id: 'C' + Date.now(), id_staf: st.id, jenis: b.jenis, mula: mula, akhir: akhir, catatan: String(b.catatan || '').trim(), oleh: oleh };
+    s.cuti.push(c); demoSimpan(s);
+    return { id: c.id, staffId: st.id, nama: st.nama, jenis: c.jenis, mula: mula, akhir: akhir, catatan: c.catatan, oleh: oleh };
+  }
   function demoReset() { try { localStorage.removeItem(DK); } catch (e) { /* abaikan */ } }
 
-  window.WS = { DEMO, api, passkey, cabaran, jarakMeter, terdekat, teksJarak, isoHariIni, tarikhPanjang, jamKini, tambahHari, rm, esc, tidur, demoReset };
+
+  window.WS = { DEMO, api, passkey, cabaran, jarakMeter, terdekat, teksJarak, isoHariIni, tarikhPanjang, tarikhSederhana,
+    julatTarikh, jamKini, tambahHari, rm, esc, tidur, demoReset, JENIS_CUTI };
 })();
